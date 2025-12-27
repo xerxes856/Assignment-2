@@ -1,0 +1,232 @@
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import math
+
+
+class Text:
+    """A class to represent text that can be displayed on a canvas."""
+    
+    def __init__(self, content, x=0, y=0, font_size=12, font_family='Arial', 
+                 color='black', bold=False, italic=False, alignment='left'):
+        """
+        Initialize a Text object.
+        
+        Args:
+            content: The text string to display
+            x: X-coordinate of the text position (default: 0)
+            y: Y-coordinate of the text position (default: 0)
+            font_size: Size of the font in points (default: 12)
+            font_family: Font family name (default: 'Arial')
+            color: Color of the text (default: 'black')
+            bold: Whether text should be bold (default: False)
+            italic: Whether text should be italic (default: False)
+            alignment: Text alignment - 'left', 'center', or 'right' (default: 'left')
+        """
+        self.content = content
+        self.x = x
+        self.y = y
+        self.font_size = font_size
+        self.font_family = font_family
+        self.color = color
+        self.bold = bold
+        self.italic = italic
+        self.alignment = alignment
+    
+    def get_length(self):
+        """Return the number of characters in the text."""
+        return len(self.content)
+    
+    def to_uppercase(self):
+        """Convert the text content to uppercase."""
+        self.content = self.content.upper()
+    
+    def to_lowercase(self):
+        """Convert the text content to lowercase."""
+        self.content = self.content.lower()
+    
+    def __str__(self):
+        """String representation of the Text."""
+        return f"Text('{self.content}', pos=({self.x},{self.y}), size={self.font_size})"
+
+
+class Canvas:
+    """A class to represent a canvas where shapes and text can be displayed."""
+    
+    def __init__(self, width=800, height=600, background_color='white', title='Canvas'):
+        """Initialize a Canvas."""
+        self.width = width
+        self.height = height
+        self.background_color = background_color
+        self.title = title
+        self.shapes = []
+        self.texts = []
+    
+    def add_shape(self, shape):
+        """Add a shape to the canvas."""
+        self.shapes.append(shape)
+    
+    def add_text(self, text):
+        """Add text to the canvas."""
+        self.texts.append(text)
+    
+    def remove_shape(self, shape):
+        """Remove a shape from the canvas."""
+        if shape in self.shapes:
+            self.shapes.remove(shape)
+    
+    def remove_text(self, text):
+        """Remove text from the canvas."""
+        if text in self.texts:
+            self.texts.remove(text)
+    
+    def clear(self):
+        """Remove all shapes and text from the canvas."""
+        self.shapes = []
+        self.texts = []
+    
+    def display(self):
+        """Display the canvas with all its shapes and text."""
+        fig, ax = plt.subplots(figsize=(self.width/100, self.height/100))
+        ax.set_facecolor(self.background_color)
+        
+        # Draw all shapes
+        for shape in self.shapes:
+            if isinstance(shape, Circle):
+                circle = mpatches.Circle(
+                    (shape.x, shape.y),
+                    shape.radius,
+                    facecolor=shape.fill,
+                    edgecolor=shape.stroke,
+                    linewidth=shape.stroke_width
+                )
+                ax.add_patch(circle)
+            elif isinstance(shape, Rectangle):
+                rectangle = mpatches.Rectangle(
+                    (shape.x, shape.y),
+                    shape.width,
+                    shape.height,
+                    facecolor=shape.fill,
+                    edgecolor=shape.stroke,
+                    linewidth=shape.stroke_width
+                )
+                ax.add_patch(rectangle)
+        
+        # Draw all text
+        for text in self.texts:
+            font_weight = 'bold' if text.bold else 'normal'
+            font_style = 'italic' if text.italic else 'normal'
+            
+            ax.text(
+                text.x, 
+                text.y, 
+                text.content,
+                fontsize=text.font_size,
+                color=text.color,
+                family=text.font_family,
+                weight=font_weight,
+                style=font_style,
+                ha=text.alignment,
+                va='bottom'
+            )
+        
+        ax.set_xlim(0, self.width)
+        ax.set_ylim(0, self.height)
+        ax.set_aspect('equal')
+        ax.set_title(self.title, fontsize=14, fontweight='bold')
+        plt.tight_layout()
+        plt.show()
+    
+    def get_item_count(self):
+        """Return the total number of items (shapes + text) on the canvas."""
+        return len(self.shapes) + len(self.texts)
+    
+    def __str__(self):
+        """String representation of the Canvas."""
+        return f"Canvas(width={self.width}, height={self.height}, shapes={len(self.shapes)}, texts={len(self.texts)})"
+
+
+class Circle:
+    """A class to represent a circle."""
+    
+    def __init__(self, radius, x=0, y=0, fill='blue', stroke='black', stroke_width=2):
+        self.radius = radius
+        self.x = x
+        self.y = y
+        self.fill = fill
+        self.stroke = stroke
+        self.stroke_width = stroke_width
+    
+    def area(self):
+        return math.pi * self.radius ** 2
+    
+    def __str__(self):
+        return f"Circle(radius={self.radius}, pos=({self.x},{self.y}))"
+
+
+class Rectangle:
+    """A class to represent a rectangle."""
+    
+    def __init__(self, width, height, x=0, y=0, fill='red', stroke='black', stroke_width=2):
+        self.width = width
+        self.height = height
+        self.x = x
+        self.y = y
+        self.fill = fill
+        self.stroke = stroke
+        self.stroke_width = stroke_width
+    
+    def area(self):
+        return self.width * self.height
+    
+    def __str__(self):
+        return f"Rectangle(width={self.width}, height={self.height}, pos=({self.x},{self.y}))"
+
+
+# Test the Text class
+if __name__ == "__main__":
+    print("=== Testing Text Class ===\n")
+    
+    # Create a canvas
+    canvas = Canvas(width=600, height=400, background_color='lightyellow', title='Text Demo Canvas')
+    print(f"Created: {canvas}\n")
+    
+    # Create some text objects
+    text1 = Text("Hello, Canvas!", x=300, y=350, font_size=24, color='darkblue', 
+                 bold=True, alignment='center')
+    text2 = Text("This is a demonstration", x=300, y=300, font_size=16, 
+                 color='gray', alignment='center')
+    text3 = Text("Welcome!", x=50, y=200, font_size=20, color='red', 
+                 bold=True, italic=True)
+    text4 = Text("python programming", x=400, y=150, font_size=14, color='green')
+    
+    # Test text methods
+    print("Original text4:", text4.content)
+    text4.to_uppercase()
+    print("After uppercase:", text4.content)
+    print(f"Length: {text4.get_length()} characters\n")
+    
+    # Add shapes for background
+    rect_bg = Rectangle(width=500, height=80, x=50, y=270, 
+                       fill='lightblue', stroke='blue', stroke_width=2)
+    circle_deco = Circle(radius=30, x=100, y=100, 
+                        fill='yellow', stroke='orange', stroke_width=3)
+    
+    # Add everything to canvas
+    canvas.add_shape(rect_bg)
+    canvas.add_shape(circle_deco)
+    canvas.add_text(text1)
+    canvas.add_text(text2)
+    canvas.add_text(text3)
+    canvas.add_text(text4)
+    
+    print(f"Canvas has {canvas.get_item_count()} total items")
+    print(f"  - {len(canvas.shapes)} shapes")
+    print(f"  - {len(canvas.texts)} text objects\n")
+    
+    print("Text objects on canvas:")
+    for i, text in enumerate(canvas.texts, 1):
+        print(f"  {i}. {text}")
+    
+    # Display the canvas
+    print("\nDisplaying canvas with text and shapes...")
+    canvas.display()
